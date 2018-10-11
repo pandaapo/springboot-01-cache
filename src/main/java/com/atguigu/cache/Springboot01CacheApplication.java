@@ -16,7 +16,23 @@ import org.springframework.cache.annotation.EnableCaching;
  * 二、整合缓存
  * 步骤
  * 1、开启基于注解的缓存
- * 2、标注缓存注解即可。@CacheEnable @CacheEvict @……
+ * 2、标注缓存注解即可。@CacheEnable @CacheEvict @CachePut
+ *
+ * 默认使用的是ConcurrentMapCacheManager==ConcurrentMapCache；将数据保存在ConcurrentMap<Object,Object>中
+ * 开发中使用缓存中间件：redis、memcached、ehcache
+ * 三、整合redis作为缓存（尚硅谷有专门的redis课程）
+ * 1、使用docker安装redis。（docker中国，比直接docker hub要快）
+ * 1-1、下载镜像：docker pull registry.docker-cn.com/library/redis
+ * 1-2、启动镜像：docker run -d -p 6379:6379 --name myredis registry.docker-cn.com/library/redis （-d：后台启动； -p：将容器端口和镜像端口映射；--name：取个容器名称 用哪个镜像启动）
+ * 2、redis的部分常用命令：
+ *     append key value
+ *     get key
+ *     lpush key value1 value2 value3
+ *     lpop key
+ *     sadd key value1 value2 value3
+ *     smembers key
+ *     sismember key value
+ * 3、引入redis的starter
  */
 //指定需要扫描的mapper接口所在的包
 @MapperScan("com.atguigu.cache.mapper")

@@ -3,10 +3,13 @@ package com.atguigu.cache.service;
 import com.atguigu.cache.bean.Employee;
 import com.atguigu.cache.mapper.EmployeeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.*;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLOutput;
+
+//定义该类中所有的缓存名称。@CacheConfig抽取缓存的公共配置。
+@CacheConfig(cacheNames = {"emp"})
 @Service
 public class EmployeeService {
     @Autowired
@@ -37,7 +40,7 @@ public class EmployeeService {
      *      org.springframework.boot.autoconfigure.cache.RedisCacheConfiguration
      *      org.springframework.boot.autoconfigure.cache.CaffeineCacheConfiguration
      *      org.springframework.boot.autoconfigure.cache.GuavaCacheConfiguration
-     *      org.springframework.boot.autoconfigure.cache.SimpleCacheConfiguration
+     *      org.springframework.boot.autoconfigure.cache.SimpleCacheConfiguration【默认开启这个配置】
      *      org.springframework.boot.autoconfigure.cache.NoOpCacheConfiguration
      *      3、哪个配置类生效
      *      通过启动时自动配置类报告，得知SimpleCacheConfiguration生效
@@ -89,4 +92,40 @@ public class EmployeeService {
         employeeMapper.updateEmp(employee);
         return employee;
     }
+
+    /**
+     *@CacheEvict：清除缓存
+     *  key：指定要清除的数据
+     *  allEntries = true：删掉emp中所有的key-value，缓存emp中所有数据被清空了。
+     *  beforeInvocation = false：缓存的清除是否在方法之前执行
+     *      默认false是在方法执行之后执行的；如果方法出现异常，缓存不会被清空。
+     *      true是在方法执行之前执行；如果方法出现异常，缓存也会被清空。
+     * @param id
+     */
+    @CacheEvict(value = "emp", key = "#id", allEntries = true, beforeInvocation = false)
+    public void deleteEmp(Integer id){
+        System.out.println("deleteEmp:" + id);
+        employeeMapper.deleteEmpById(id);
+    }
+
+    /**
+     * @Caching定义复杂的缓存规则
+     * @param lastName
+     * @return
+     */
+    @Caching(
+            //在方法之后执行
+            cacheable = {
+                    @Cacheable(value = "emp", key="#lastName")
+            },
+            //在方法之后执行，分别利用返回结果的id和email存入缓存。
+            put = {
+                    @CachePut(value="emp", key="#result.id"),
+                    @CachePut(value="emp", key="#result.email"),
+            }
+    )
+    public Employee getEmpByLastName(String lastName){
+        return employeeMapper.getEmpByLastName(lastName);
+    }
+
 }
