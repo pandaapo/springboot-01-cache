@@ -8,8 +8,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLOutput;
 
-//定义该类中所有的缓存名称。@CacheConfig抽取缓存的公共配置。
-@CacheConfig(cacheNames = {"emp"})
+//定义该类中所有的缓存名称。@CacheConfig抽取缓存的公共配置。cacheManager给该类统一指定cacheManager
+//由于后来又@Primary的使用，所以cacheManager = "employeeCacheManager"可以不要
+@CacheConfig(cacheNames = {"emp"}, cacheManager = "employeeCacheManager")
 @Service
 public class EmployeeService {
     @Autowired
@@ -68,7 +69,7 @@ public class EmployeeService {
      *  自定义keyGenerator
      *  SpEL表达式：condition = "#a0>1"，表示第一个参数值大于0时才进行缓存
      */
-    @Cacheable(cacheNames = {"emp"}, condition = "#a0>1")
+    @Cacheable(cacheNames = {"emp"}, condition = "#a0>0")
     public Employee getEmp(Integer id){
 //        查询员工
         Employee employee = employeeMapper.getEmpById(id);
